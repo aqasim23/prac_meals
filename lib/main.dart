@@ -31,16 +31,16 @@ class _MyAppState extends State<MyApp> {
       _filters = filterData;
 
       _availableMeals = DUMMY_MEALS.where((meals) {
-        if(_filters['gluten'] && !meals.isGlutenFree) {
+        if (_filters['gluten'] && !meals.isGlutenFree) {
           return false;
         }
-        if(_filters['vegan'] && !meals.isVegan) {
+        if (_filters['vegan'] && !meals.isVegan) {
           return false;
         }
-        if(_filters['vegetarian'] && !meals.isVegetarian) {
+        if (_filters['vegetarian'] && !meals.isVegetarian) {
           return false;
         }
-        if(_filters['lactose'] && !meals.isLactoseFree) {
+        if (_filters['lactose'] && !meals.isLactoseFree) {
           return false;
         }
         return true;
@@ -48,8 +48,22 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _toggleFavourite (String mealId) {
-    final existingIndex = _favouriteMeals.indexWhere((meal) => meal.id == mealId);
+  void _toggleFavourite(String mealId) {
+    final existingIndex =
+        _favouriteMeals.indexWhere((meal) => meal.id == mealId);
+    if (existingIndex >=0) {
+      setState(() {
+        _favouriteMeals.removeAt(existingIndex);
+      });
+    } else {
+      setState(() {
+        _favouriteMeals.add(DUMMY_MEALS.firstWhere((element) => element.id == mealId));
+      });
+    }
+  }
+
+  bool _isMealFavourite(String id) {
+    return _favouriteMeals.any((element) => element.id == id);
   }
 
   @override
@@ -82,8 +96,9 @@ class _MyAppState extends State<MyApp> {
       // home: Categories_screen(),
       routes: {
         '/': (ctx) => TabsScreen(_favouriteMeals),
-        CategoryMealsScreen.routeName: (ctx) => CategoryMealsScreen(_availableMeals),
-        MealDetailScreen.routename: (ctx) => MealDetailScreen(),
+        CategoryMealsScreen.routeName: (ctx) =>
+            CategoryMealsScreen(_availableMeals),
+        MealDetailScreen.routename: (ctx) => MealDetailScreen(_toggleFavourite, _isMealFavourite),
         FiltersScreen.routename: (ctx) => FiltersScreen(_filters, _setFilters),
       },
       onGenerateRoute: (settings) {
